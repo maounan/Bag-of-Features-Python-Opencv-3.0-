@@ -8,7 +8,7 @@ import os
 from sklearn.svm import LinearSVC
 from sklearn.externals import joblib
 from scipy.cluster.vq import *
-
+np.set_printoptions(threshold=np.nan)
 
 def listdir_nohidden(path):
     for f in os.listdir(path):
@@ -55,12 +55,13 @@ for image_path in image_paths:
         exit()
     kpts, des = sift.detectAndCompute(im, None)
     des_list.append((image_path, des))   
-    
+
 # Stack all the descriptors vertically in a numpy array
+# print des_list
 descriptors = des_list[0][1]
 for image_path, descriptor in des_list[0:]:
     descriptors = np.vstack((descriptors, descriptor)) 
-
+print descriptors
 # 
 test_features = np.zeros((len(image_paths), k), "float32")
 for i in xrange(len(image_paths)):

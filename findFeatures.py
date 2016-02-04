@@ -10,6 +10,12 @@ from sklearn.externals import joblib
 from scipy.cluster.vq import *
 from sklearn.preprocessing import StandardScaler
 
+def mylistdir(directory):
+    """A specialized version of os.listdir() that ignores files that
+    start with a leading period."""
+    filelist = os.listdir(directory)
+    return [x for x in filelist
+            if not (x.startswith('.'))]
 
 # Get the path of the training set
 parser = ap.ArgumentParser()
@@ -20,8 +26,7 @@ sift = cv2.xfeatures2d.SIFT_create()
 
 # Get the training classes names and store them in a list
 train_path = args["trainingSet"]
-print train_path
-training_names = os.listdir(train_path)
+training_names = mylistdir(train_path)
 
 # Get all the path to the images and save them in a list
 # image_paths and the corresponding label in image_paths
@@ -35,6 +40,7 @@ for training_name in training_names:
     image_classes+=[class_id]*len(class_path)
     class_id+=1
 
+print image_classes
 # List where all the descriptors are stored
 des_list = []
 
@@ -55,12 +61,10 @@ voc, variance = kmeans(descriptors, k, 1)
 # Calculate the histogram of features
 im_features = np.zeros((len(image_paths), k), "float32")
 for i in xrange(len(image_paths)):
-    print i
     words, distance = vq(des_list[i][1],voc)
     for w in words:
-        print w
         im_features[i][w] += 1
-
+print im_features
 # Perform Tf-Idf vectorization
 nbr_occurences = np.sum( (im_features > 0) * 1, axis = 0)
 idf = np.array(np.log((1.0*len(image_paths)+1) / (1.0*nbr_occurences + 1)), 'float32')
